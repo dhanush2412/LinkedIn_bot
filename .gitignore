@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# Secrets and sessions
+.env
+.auth/
+
+# Runtime artifacts
+data/
+output/
+profile/parsed.json
+profile/resume.pdf
+profile/biodata.md
+
+# Editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
