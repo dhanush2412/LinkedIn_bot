@@ -11,8 +11,8 @@ See [design spec](docs/superpowers/specs/2026-05-23-job-application-assistant-de
 1. `python -m venv .venv && .venv\Scripts\activate` (Windows PowerShell)
 2. `pip install -r requirements.txt`
 3. `playwright install chromium`
-4. `cp .env.example .env` and add your Groq API key.
-5. Put your `resume.pdf` and `biodata.md` in `profile/`.
+4. `copy .env.example .env` and add your Groq API key.
+5. `mkdir profile` then put your `resume.pdf` and `biodata.md` inside it.
 
 ## Usage
 
