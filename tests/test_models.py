@@ -57,6 +57,18 @@ def test_candidate_profile_holds_biodata_text():
     assert "About me" in profile.biodata_text
 
 
+def test_candidate_profile_from_json_ignores_unknown_keys():
+    data = {
+        "name": "X", "email": "x@y.com", "phone": "1", "location": "L",
+        "total_years_experience": 1.0, "current_title": "T", "current_company": "C",
+        "skills": [], "experience": [], "education": [], "links": {},
+        "biodata_text": "b",
+        "legacy_field_from_old_version": "should be ignored",
+    }
+    profile = CandidateProfile.from_json(data)
+    assert profile.name == "X"
+
+
 def test_tailored_output_has_required_fields():
     out = TailoredOutput(
         cover_letter="Dear...",

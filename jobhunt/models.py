@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import hashlib
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, fields as dc_fields, asdict
 from typing import Any
 from urllib.parse import urlparse
 
@@ -74,7 +74,8 @@ class CandidateProfile:
 
     @classmethod
     def from_json(cls, data: dict[str, Any]) -> "CandidateProfile":
-        return cls(**data)
+        known = {f.name for f in dc_fields(cls)}
+        return cls(**{k: v for k, v in data.items() if k in known})
 
 
 @dataclass
