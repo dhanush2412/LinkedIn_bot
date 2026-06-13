@@ -17,6 +17,8 @@ dist/
 *service*account*.json
 google-credentials*.json
 *.gserviceaccount.json
+analyticstest14-194c3-a9042be95953.json
+/*.json
 
 # Runtime artifacts
 data/
