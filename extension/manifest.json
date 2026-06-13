@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "JobHunt Easy Apply Assistant",
+  "version": "0.1.0",
+  "description": "Tailor LinkedIn Easy Apply applications with your local jobhunt server.",
+  "permissions": ["activeTab", "storage", "sidePanel"],
+  "host_permissions": [
+    "https://www.linkedin.com/*",
+    "http://127.0.0.1:7860/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "JobHunt"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.linkedin.com/jobs/*", "https://www.linkedin.com/my-items/*"],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
