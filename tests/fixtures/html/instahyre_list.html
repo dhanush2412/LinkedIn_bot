@@ -1,0 +1,41 @@
+<!--
+  SYNTHETIC FIXTURE — NOT captured from the live Instahyre site.
+
+  Instahyre's opportunities page sits behind a login wall, so a real fixture
+  cannot be captured without an authenticated session. This file is a
+  plausible, hand-written stand-in whose ONLY purpose is to exercise the
+  defensive parsing logic in jobhunt/scrapers/instahyre.py.
+
+  TO GET REAL FIXTURES: log in, then run
+    .\.venv\Scripts\python.exe scripts/capture_instahyre_fixture.py
+  and adjust the selectors in instahyre.py to match the real DOM.
+-->
+<!DOCTYPE html>
+<html>
+<head><title>Opportunities - Instahyre</title></head>
+<body>
+  <div class="opportunities-list">
+    <div class="opportunity-card">
+      <a href="/candidate/opportunities/12345" class="opportunity-link">
+        <h2 class="opportunity-title">Senior Backend Engineer</h2>
+        <div class="company-name">Acme Technologies</div>
+        <div class="opportunity-location">Bengaluru / Remote</div>
+      </a>
+    </div>
+    <div class="opportunity-card">
+      <a href="/candidate/opportunities/67890" class="opportunity-link">
+        <h2 class="opportunity-title">Full Stack Developer</h2>
+        <div class="company-name">Widget Labs</div>
+        <div class="opportunity-location">Remote (India)</div>
+      </a>
+    </div>
+    <div class="opportunity-card">
+      <a href="/candidate/opportunities/11223" class="opportunity-link">
+        <h2 class="opportunity-title">Python Platform Engineer</h2>
+        <div class="company-name">DataForge</div>
+        <div class="opportunity-location">Hyderabad</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>
