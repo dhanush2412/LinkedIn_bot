@@ -13,6 +13,10 @@ dist/
 # Secrets and sessions
 .env
 .auth/
+# Google service-account key (never commit credentials)
+*service*account*.json
+google-credentials*.json
+*.gserviceaccount.json
 
 # Runtime artifacts
 data/

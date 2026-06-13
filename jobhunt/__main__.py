@@ -59,6 +59,12 @@ def cmd_scrape(args):
     added = csv.append(jobs)
     print(f"Scraped {len(jobs)} jobs; {added} new (after dedup) appended to {csv.path}")
 
+    from jobhunt.sheets_store import maybe_store
+    sheet = maybe_store()
+    if sheet is not None:
+        pushed = sheet.append(jobs)
+        print(f"Pushed {pushed} new job(s) to Google Sheets.")
+
 
 def cmd_tailor(args):
     csv = JobsCsv(_data_dir() / "jobs.csv")
@@ -69,7 +75,25 @@ def cmd_tailor(args):
     profile = load_profile(_profile_dir())
     out = tailor(job, profile, form_questions=[], output_root=_output_dir(), force=args.force)
     csv.mark_tailored(job.job_id)
+    from jobhunt.sheets_store import maybe_store
+    sheet = maybe_store()
+    if sheet is not None:
+        sheet.mark_tailored(job.job_id)
     print(f"Tailored materials in: {Path(out.resume_pdf_path).parent}")
+
+
+def cmd_sync_sheet(_args):
+    from jobhunt.sheets_store import maybe_store, is_configured
+    if not is_configured():
+        print("Google Sheets not configured. Set GOOGLE_SERVICE_ACCOUNT_FILE and "
+              "JOBHUNT_SHEET_ID in .env.", file=sys.stderr)
+        sys.exit(2)
+    sheet = maybe_store()
+    if sheet is None:
+        sys.exit(1)
+    jobs = JobsCsv(_data_dir() / "jobs.csv").read_all()
+    pushed = sheet.append(jobs)
+    print(f"Synced {len(jobs)} CSV jobs to Google Sheets; {pushed} new row(s) added.")
 
 
 def cmd_serve(_args):
@@ -108,6 +132,9 @@ def main(argv=None):
 
     p_serve = sub.add_parser("serve")
     p_serve.set_defaults(func=cmd_serve)
+
+    p_sync = sub.add_parser("sync-sheet", help="push all CSV jobs to the configured Google Sheet")
+    p_sync.set_defaults(func=cmd_sync_sheet)
 
     args = parser.parse_args(argv)
     args.func(args)
