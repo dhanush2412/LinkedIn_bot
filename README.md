@@ -30,9 +30,25 @@ python -m jobhunt tailor <job_id_or_url>
 python -m jobhunt serve
 ```
 
-`scrape` opens a real Chrome window (required to bypass anti-bot). After running,
-open `data/jobs.csv`, pick a `job_id`, and run `tailor` on it. Tailored materials
-(resume PDF, cover letter, form answers) land in `output/<job_id>/`.
+`scrape simplyhired` / `scrape instahyre` open a real Chrome window (required to
+bypass anti-bot). After running, open `data/jobs.csv`, pick a `job_id`, and run
+`tailor` on it. Tailored materials (resume PDF, cover letter, form answers) land
+in `output/<job_id>/`.
+
+### LinkedIn job discovery (via Apify — no account risk)
+
+`scrape linkedin` pulls jobs from a LinkedIn search **without using your LinkedIn
+account or browser** — it calls Apify's hosted LinkedIn scraper, so your account
+is never at ban risk. It needs a free `APIFY_TOKEN` in `.env` (sign up at
+apify.com → Settings → API tokens; free tier ≈ 5,000 jobs/month).
+
+```
+python -m jobhunt scrape linkedin --url "<LinkedIn jobs-search URL>" --max 25
+```
+
+Get the URL by searching jobs on LinkedIn in your browser and copying the address
+bar (set filters like Entry level / Remote first). Jobs land in `data/jobs.csv`
+and tailor exactly like any other source.
 
 ## LinkedIn Easy Apply extension
 

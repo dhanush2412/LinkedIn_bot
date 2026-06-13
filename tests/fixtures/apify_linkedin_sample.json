@@ -1,0 +1,41 @@
+[
+  {
+    "id": "4371382462",
+    "link": "https://in.linkedin.com/jobs/view/python-django-at-formics-tech-llc-4371382462?position=60&pageNum=0&refId=gSUomhPwsDFxAVGUyxMiHg%3D%3D&trackingId=4yLBPWnw%2BliR9npWVXWbUg%3D%3D",
+    "title": "Python Django",
+    "companyName": "Formics Tech LLC",
+    "location": "Ahmedabad, Gujarat, India",
+    "postedAt": "2026-02-12",
+    "descriptionText": "About The Opportunity\n\nA fast-growing software product organization in the SaaS and web applications sector building scalable, data-driven platforms for enterprise and SMB customers. We develop secure, high-performance back-end services and customer-facing web applications that power transactional workflows and analytics.\n\nWe are hiring an on-site Python Django Developer in India to join the core engineering team and own feature delivery, reliability, and performance for production services.\n\nRole &amp; Responsibilities\n\n\n\n- Design, develop and maintain scalable Django-based web applications and backend services with a focus on reliability and performance.\n- Build and own RESTful APIs using Django REST Framework, including API versioning, authentication, and documentation.\n- Optimize data models and SQL queries, implement schema migrations, and tune PostgreSQL for production workloads.\n- Implement and operate background processing and scheduled jobs using Celery; select and configure brokers and monitoring for resilient pipelines.\n- Containerize applications with Docker, collaborate on CI/CD pipelines, and contribute to infrastructure-as-code and deployment automation.\n- Drive engineering quality through unit/integration tests, code reviews, debugging in production, and clear technical documentation.\n\nSkills &amp; Qualifications\n\nMust-Have\n\n\n\n- Python\n- Django\n- Django REST Framework\n- PostgreSQL\n- RESTful APIs\n- Git\n- Docker\n- Celery\n\nPreferred\n\n\n\n- Redis\n- AWS\n- Kubernetes\n\nQualifications: Proven track record building production Django applications; hands-on experience with API-first design, database performance tuning, container-based deployments, and operating background job systems. This is an on-site role based in India.\n\nBenefits &amp; Culture Highlights\n\n\n\n- Collaborative, engineering-first culture with strong ownership and fast decision-making.\n- Opportunities for technical growth, mentorship, and working on end-to-end product delivery.\n- Competitive compensation, health benefits, and focused on work that scales to thousands of users.\n\nTo apply, please share your CV and a brief note on a recent Django project you built or maintained in production\u2014highlight architecture choices, performance work, and your role in delivery.\n\nSkills: django,communication,git,celery,docker,restful apis,python,postgresql",
+    "applyUrl": "",
+    "seniorityLevel": "Associate",
+    "employmentType": "Full-time",
+    "salary": ""
+  },
+  {
+    "id": "4367151043",
+    "link": "https://in.linkedin.com/jobs/view/python-full-stack-developer-at-cipherstudio-4367151043?position=57&pageNum=0&refId=gSUomhPwsDFxAVGUyxMiHg%3D%3D&trackingId=Zs0Fl2dimbbUP32KnuYBhg%3D%3D",
+    "title": "Python Full Stack Developer",
+    "companyName": "CipherStudio",
+    "location": "Chandigarh, Chandigarh, India",
+    "postedAt": "2026-01-29",
+    "descriptionText": "We are seeking a highly skilled and motivated Full-Stack Developer with strong backend expertise in Python and hands-on experience with frameworks such as Flask, Django, and FastAPI. The ideal candidate should also have working experience with SQL and NoSQL databases and a decent understanding of frontend technologies like React.js and Vue.js .\n\nResponsibilities\n\n\n\n- Develop and maintain backend services using Python (Flask, Django, FastAPI).\n- Design scalable, secure, and high-performance APIs and applications.\n- Work with both SQL and NoSQL databases for data modelling and management.\n- Collaborate with frontend developers and contribute to React.js and Vue.js codebases when needed.\n- Write clean, reusable, and testable code.\n- Debug, optimise, and enhance application performance.\n- Participate in code reviews and technical discussions.\n- Ensure the application meets security and compliance requirements.\n\nThis job was posted by Indu Cipher from CipherStudio.",
+    "applyUrl": "",
+    "seniorityLevel": "Not Applicable",
+    "employmentType": "Full-time",
+    "salary": ""
+  },
+  {
+    "id": "4372945105",
+    "link": "https://in.linkedin.com/jobs/view/python-engineer-at-codvo-ai-4372945105?position=56&pageNum=0&refId=gSUomhPwsDFxAVGUyxMiHg%3D%3D&trackingId=pf5tQ8rBrzvkjcEe9zPrPw%3D%3D",
+    "title": "Python Engineer",
+    "companyName": "Codvo.ai",
+    "location": "Mumbai Metropolitan Region",
+    "postedAt": "2026-02-14",
+    "descriptionText": "Python Engineer Job Description\n\nExperience - 3-7 years\n\nAbout The Role\n\nWe are looking for a hands-on Python Engineer to join our analytics team and collaborate closely with the Data Science team. The ideal candidate will have strong Python development skills, apply best practices in design and coding, and ensure performance and scalability in production environments.\n\nKey Responsibilities\n\n\n\n- Apply design and coding best practices, including vectorization and object-oriented programming in Python.\n- Ensure algorithms cover different scenarios with a focus on performance and scalability.\n- Rapid ramp-up to work on deliverables within Scrum teams.\n- Collaborate with cross-functional teams to integrate solutions into production systems.\n- Utilize CI/CD, version control (Git), and automated testing in ML projects.\n\n\nRequired Skills &amp; Qualifications\n\n\n\n- Hands-on development expertise for analytics teams.\n- Experience with Python and libraries such as NumPy, Pandas, etc.\n- Strong understanding of object-oriented programming and its application in Python.\n- Ability to develop algorithms into production code with emphasis on performance and scalability.\n- Experience in applying design and coding best practices, including vectorization.\n- 3-7 years of experience in software and/or Python development.\n- Worked with CI/CD, version control (Git), and automated testing in ML projects.",
+    "applyUrl": "",
+    "seniorityLevel": "Not Applicable",
+    "employmentType": "Full-time",
+    "salary": ""
+  }
+]

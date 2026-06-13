@@ -36,6 +36,10 @@ def cmd_scrape(args):
     if args.platform == "simplyhired" and not args.keywords:
         print("simplyhired requires --keywords (e.g. --keywords \"python backend\")", file=sys.stderr)
         sys.exit(2)
+    if args.platform == "linkedin" and not args.url:
+        print("linkedin requires --url (a LinkedIn jobs-search URL copied from your browser)",
+              file=sys.stderr)
+        sys.exit(2)
     csv = JobsCsv(_data_dir() / "jobs.csv")
     if args.platform == "simplyhired":
         from jobhunt.scrapers.simplyhired import SimplyHiredScraper
@@ -45,6 +49,10 @@ def cmd_scrape(args):
         from jobhunt.scrapers.instahyre import InstahyreScraper
         with InstahyreScraper(headless=args.headless) as s:
             jobs = list(s.scrape(args.keywords, max_jobs=args.max))
+    elif args.platform == "linkedin":
+        from jobhunt.scrapers.linkedin_apify import scrape_linkedin
+        print("Scraping LinkedIn via Apify (this can take 1-3 minutes)...")
+        jobs = scrape_linkedin(args.url, max_jobs=args.max)
     else:
         print(f"Unknown platform: {args.platform}", file=sys.stderr)
         sys.exit(2)
@@ -82,9 +90,11 @@ def main(argv=None):
     p_prof_refresh.set_defaults(func=cmd_profile_refresh)
 
     p_scrape = sub.add_parser("scrape")
-    p_scrape.add_argument("platform", choices=["simplyhired", "instahyre"])
+    p_scrape.add_argument("platform", choices=["simplyhired", "instahyre", "linkedin"])
     p_scrape.add_argument("--keywords", default="",
                           help="filter keywords; required for simplyhired, optional for instahyre")
+    p_scrape.add_argument("--url", default="",
+                          help="LinkedIn jobs-search URL (required for linkedin platform)")
     p_scrape.add_argument("--location", default="remote")
     p_scrape.add_argument("--max", type=int, default=30)
     p_scrape.add_argument("--headless", action="store_true",
