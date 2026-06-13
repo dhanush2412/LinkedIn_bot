@@ -44,12 +44,23 @@ def _parse_resume_pdf(path: Path) -> dict[str, Any]:
     phone = phone_match.group(0).strip() if phone_match else ""
 
     location = ""
+    _LOC_HINTS = (
+        # cities
+        "Bengaluru", "Bangalore", "Mumbai", "Delhi", "Hyderabad", "Chennai",
+        "Pune", "Mangalore", "Mangaluru", "Kolkata", "Ahmedabad", "Jaipur",
+        "Kochi", "Coimbatore", "Noida", "Gurgaon", "Gurugram", "Remote",
+        # states (catch "<City>, <State>")
+        "Karnataka", "Maharashtra", "Tamil Nadu", "Telangana", "Kerala",
+        "Gujarat", "Rajasthan", "West Bengal", "Uttar Pradesh", "Haryana",
+        "Punjab", "Goa",
+    )
     for ln in lines[:5]:
-        for city in ("Bengaluru", "Bangalore", "Mumbai", "Delhi", "Hyderabad", "Chennai", "Pune", "Remote"):
-            if city in ln:
-                location = ln
-                break
-        if location:
+        # a contact line usually has the location as one comma-separated piece
+        if any(h in ln for h in _LOC_HINTS):
+            # if it's a long pipe/comma contact line, grab the piece with the hint
+            parts = [p.strip() for p in re.split(r"[|]", ln)]
+            match = next((p for p in parts if any(h in p for h in _LOC_HINTS)), ln)
+            location = match
             break
 
     skills = _extract_skills(text)
