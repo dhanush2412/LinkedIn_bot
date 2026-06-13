@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 import pytest
-from jobhunt.profile_loader import load_profile, _parse_resume_pdf
+from jobhunt.profile_loader import load_profile, _parse_resume_pdf, _extract_skills
 from jobhunt.models import CandidateProfile
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -21,6 +21,22 @@ def test_parse_resume_pdf_extracts_skills():
     parsed = _parse_resume_pdf(SAMPLE_RESUME)
     assert "Python" in parsed["skills"]
     assert "FastAPI" in parsed["skills"]
+
+
+def test_extract_skills_matches_symbol_skills():
+    text = "Languages: Python, C++, C#, Node.js and Go. Frameworks: FastAPI."
+    skills = _extract_skills(text)
+    assert "C++" in skills
+    assert "C#" in skills
+    assert "Node.js" in skills
+    assert "Python" in skills
+
+
+def test_extract_skills_does_not_partial_match():
+    # "Java" must not match inside "JavaScript"
+    skills = _extract_skills("Strong in JavaScript and TypeScript.")
+    assert "JavaScript" in skills
+    assert "Java" not in skills
 
 
 def test_load_profile_combines_resume_and_biodata(tmp_path):

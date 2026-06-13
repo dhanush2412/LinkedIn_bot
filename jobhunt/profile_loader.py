@@ -20,10 +20,21 @@ KNOWN_SKILLS = {
 }
 
 
+def _extract_skills(text: str) -> list[str]:
+    # Use lookarounds instead of \b so skills ending in symbols (C++, C#, Node.js)
+    # match correctly — \b fails around '+'/'#' because they are non-word chars.
+    return sorted({
+        s for s in KNOWN_SKILLS
+        if re.search(rf"(?<!\w){re.escape(s)}(?!\w)", text, re.IGNORECASE)
+    })
+
+
 def _parse_resume_pdf(path: Path) -> dict[str, Any]:
     doc = fitz.open(str(path))
-    text = "\n".join(page.get_text("text") for page in doc)
-    doc.close()
+    try:
+        text = "\n".join(page.get_text("text") for page in doc)
+    finally:
+        doc.close()
     lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
 
     name = lines[0] if lines else ""
@@ -41,7 +52,7 @@ def _parse_resume_pdf(path: Path) -> dict[str, Any]:
         if location:
             break
 
-    skills = sorted({s for s in KNOWN_SKILLS if re.search(rf"\b{re.escape(s)}\b", text, re.IGNORECASE)})
+    skills = _extract_skills(text)
 
     years = 0.0
     yr_match = re.search(r"(\d+(?:\.\d+)?)\s*(?:\+)?\s*(?:years?|yrs?)", text, re.IGNORECASE)
