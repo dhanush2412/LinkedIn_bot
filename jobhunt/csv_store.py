@@ -19,7 +19,26 @@ class JobsCsv:
             reader = csv.DictReader(f)
             return {row["job_id"] for row in reader}
 
+    def _header_matches(self) -> bool:
+        if not self.path.exists():
+            return True
+        with self.path.open("r", encoding="utf-8", newline="") as f:
+            first = f.readline().strip()
+        return first == ",".join(Job.CSV_FIELDS)
+
+    def _migrate_if_needed(self) -> None:
+        """If the on-disk header differs from the current schema, rewrite the file
+        with the new columns (old rows get safe defaults via from_csv_row)."""
+        if self.path.exists() and not self._header_matches():
+            rows = self.read_all()
+            with self.path.open("w", encoding="utf-8", newline="") as f:
+                writer = csv.DictWriter(f, fieldnames=Job.CSV_FIELDS)
+                writer.writeheader()
+                for j in rows:
+                    writer.writerow(j.to_csv_row())
+
     def append(self, jobs: Iterable[Job]) -> int:
+        self._migrate_if_needed()
         existing = self._existing_ids()
         new = []
         for j in jobs:

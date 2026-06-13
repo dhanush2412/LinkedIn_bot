@@ -25,11 +25,12 @@ class Job:
     posted_date: str
     jd_text: str
     scraped_at: str
+    applicants: str = ""   # applicant count when known (LinkedIn); "" if unknown
     tailored: bool = False
 
     CSV_FIELDS = [
         "job_id", "source", "title", "company", "location", "remote_type",
-        "url", "posted_date", "jd_text", "scraped_at", "tailored",
+        "url", "posted_date", "jd_text", "scraped_at", "applicants", "tailored",
     ]
 
     def to_csv_row(self) -> dict[str, str]:
@@ -39,6 +40,7 @@ class Job:
 
     @classmethod
     def from_csv_row(cls, row: dict[str, str]) -> "Job":
+        # .get() keeps old CSVs (without the applicants column) readable.
         return cls(
             job_id=row["job_id"],
             source=row["source"],
@@ -50,7 +52,8 @@ class Job:
             posted_date=row["posted_date"],
             jd_text=row["jd_text"],
             scraped_at=row["scraped_at"],
-            tailored=row["tailored"].lower() == "true",
+            applicants=row.get("applicants", ""),
+            tailored=row.get("tailored", "false").lower() == "true",
         )
 
 

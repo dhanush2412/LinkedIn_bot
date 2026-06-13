@@ -12,6 +12,7 @@ like the other sources.
 from __future__ import annotations
 
 import os
+import re
 from datetime import datetime, timezone
 from typing import Any
 
@@ -42,6 +43,17 @@ def _remote_type(location: str, employment_type: str = "") -> str:
     return "onsite"
 
 
+def parse_applicants(raw: Any) -> int | None:
+    """Normalize Apify's applicantsCount (int, '27', 'Over 100 applicants', '200+')
+    to an int, or None when unknown."""
+    if raw is None or raw == "":
+        return None
+    if isinstance(raw, (int, float)):
+        return int(raw)
+    m = re.search(r"\d+", str(raw))
+    return int(m.group(0)) if m else None
+
+
 def parse_apify_jobs(items: list[dict[str, Any]]) -> list[Job]:
     """Map raw Apify dataset items to Job objects. Pure function (no network)."""
     jobs: list[Job] = []
@@ -52,6 +64,7 @@ def parse_apify_jobs(items: list[dict[str, Any]]) -> list[Job]:
             continue
         location = (it.get("location") or "").strip()
         jd = (it.get("descriptionText") or "").strip()
+        n = parse_applicants(it.get("applicantsCount"))
         jobs.append(Job(
             job_id=derive_job_id(SOURCE, link),
             source=SOURCE,
@@ -63,6 +76,7 @@ def parse_apify_jobs(items: list[dict[str, Any]]) -> list[Job]:
             posted_date=(it.get("postedAt") or "").strip(),
             jd_text=jd,
             scraped_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            applicants="" if n is None else str(n),
             tailored=False,
         ))
     return jobs
@@ -88,6 +102,29 @@ def fetch_linkedin_jobs(
     return resp.json()
 
 
-def scrape_linkedin(search_url: str, max_jobs: int = 50, token: str | None = None) -> list[Job]:
-    items = fetch_linkedin_jobs(search_url, count=max_jobs, token=token)
-    return parse_apify_jobs(items)[:max_jobs]
+def filter_by_applicants(jobs: list[Job], max_applicants: int | None) -> list[Job]:
+    """Keep jobs with a known applicant count <= max_applicants. Jobs whose count
+    is unknown ("") are KEPT (benefit of the doubt). No-op when max_applicants is None."""
+    if max_applicants is None:
+        return jobs
+    out = []
+    for j in jobs:
+        if j.applicants == "":
+            out.append(j)
+        elif int(j.applicants) <= max_applicants:
+            out.append(j)
+    return out
+
+
+def scrape_linkedin(
+    search_url: str,
+    max_jobs: int = 50,
+    token: str | None = None,
+    max_applicants: int | None = None,
+) -> list[Job]:
+    # Apify caps low; over-fetch a bit so the applicant filter still yields enough.
+    fetch_count = max_jobs if max_applicants is None else max(max_jobs * 3, max_jobs)
+    items = fetch_linkedin_jobs(search_url, count=fetch_count, token=token)
+    jobs = parse_apify_jobs(items)
+    jobs = filter_by_applicants(jobs, max_applicants)
+    return jobs[:max_jobs]

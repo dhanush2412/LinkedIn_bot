@@ -13,7 +13,6 @@ The target sheet must be shared (Editor) with the service account's email.
 from __future__ import annotations
 
 import os
-from pathlib import Path
 
 from jobhunt.models import Job
 
@@ -21,7 +20,7 @@ from jobhunt.models import Job
 # Columns written to the sheet (header row), in order.
 HEADER = [
     "job_id", "source", "title", "company", "location", "remote_type",
-    "posted_date", "url", "applied", "tailored", "scraped_at", "jd_snippet",
+    "posted_date", "applicants", "url", "applied", "tailored", "scraped_at", "jd_snippet",
 ]
 
 
@@ -34,7 +33,7 @@ def _row_from_job(job: Job) -> list[str]:
     snippet = (job.jd_text or "").replace("\n", " ").strip()[:300]
     return [
         job.job_id, job.source, job.title, job.company, job.location,
-        job.remote_type, job.posted_date, job.url, "",
+        job.remote_type, job.posted_date, job.applicants, job.url, "",
         "true" if job.tailored else "false", job.scraped_at, snippet,
     ]
 
@@ -72,6 +71,16 @@ class SheetsStore:
                 continue
             existing.add(j.job_id)
             rows.append(_row_from_job(j))
+        if rows:
+            self._ws.append_rows(rows, value_input_option="USER_ENTERED")
+        return len(rows)
+
+    def rebuild(self, jobs: list[Job]) -> int:
+        """Wipe the sheet and rewrite header + all rows. Use after a schema change
+        that misaligns existing rows. NOTE: this clears the 'applied' column too."""
+        self._ws.clear()
+        self._ws.append_row(HEADER, value_input_option="RAW")
+        rows = [_row_from_job(j) for j in jobs]
         if rows:
             self._ws.append_rows(rows, value_input_option="USER_ENTERED")
         return len(rows)

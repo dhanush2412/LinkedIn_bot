@@ -3,6 +3,29 @@ from jobhunt.csv_store import JobsCsv
 from jobhunt.models import Job
 
 
+def test_append_migrates_old_schema_csv(tmp_path):
+    # Simulate a pre-"applicants" CSV (11 columns, no applicants col).
+    csv_path = tmp_path / "jobs.csv"
+    old_header = ("job_id,source,title,company,location,remote_type,"
+                  "url,posted_date,jd_text,scraped_at,tailored")
+    csv_path.write_text(
+        old_header + "\n"
+        "old1,linkedin,Dev,Acme,Remote,remote,https://x/1,,jd,2026-01-01T00:00:00,false\n",
+        encoding="utf-8",
+    )
+    store = JobsCsv(csv_path)
+    # Appending a new job should migrate the file to the new schema first.
+    store.append([_make_job("new1")])
+    rows = store.read_all()
+    ids = sorted(j.job_id for j in rows)
+    assert ids == ["new1", "old1"]
+    # old row gains an empty applicants field, header now includes it
+    header_line = csv_path.read_text(encoding="utf-8").splitlines()[0]
+    assert "applicants" in header_line
+    old = next(j for j in rows if j.job_id == "old1")
+    assert old.applicants == ""
+
+
 def _make_job(job_id: str = "abc123", url: str = "https://example.com/job/1") -> Job:
     return Job(
         job_id=job_id,

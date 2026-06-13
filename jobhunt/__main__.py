@@ -52,7 +52,7 @@ def cmd_scrape(args):
     elif args.platform == "linkedin":
         from jobhunt.scrapers.linkedin_apify import scrape_linkedin
         print("Scraping LinkedIn via Apify (this can take 1-3 minutes)...")
-        jobs = scrape_linkedin(args.url, max_jobs=args.max)
+        jobs = scrape_linkedin(args.url, max_jobs=args.max, max_applicants=args.max_applicants)
     else:
         print(f"Unknown platform: {args.platform}", file=sys.stderr)
         sys.exit(2)
@@ -92,8 +92,13 @@ def cmd_sync_sheet(_args):
     if sheet is None:
         sys.exit(1)
     jobs = JobsCsv(_data_dir() / "jobs.csv").read_all()
-    pushed = sheet.append(jobs)
-    print(f"Synced {len(jobs)} CSV jobs to Google Sheets; {pushed} new row(s) added.")
+    if _args.rebuild:
+        n = sheet.rebuild(jobs)
+        print(f"Rebuilt Google Sheet from scratch with {n} job(s). "
+              "(NOTE: the 'applied' column was reset.)")
+    else:
+        pushed = sheet.append(jobs)
+        print(f"Synced {len(jobs)} CSV jobs to Google Sheets; {pushed} new row(s) added.")
 
 
 def cmd_serve(_args):
@@ -121,6 +126,9 @@ def main(argv=None):
                           help="LinkedIn jobs-search URL (required for linkedin platform)")
     p_scrape.add_argument("--location", default="remote")
     p_scrape.add_argument("--max", type=int, default=30)
+    p_scrape.add_argument("--max-applicants", type=int, default=None, dest="max_applicants",
+                          help="LinkedIn only: keep only jobs with <= this many applicants "
+                               "(less competition). Jobs with unknown counts are kept.")
     p_scrape.add_argument("--headless", action="store_true",
                           help="run browser headless (NOT recommended — Cloudflare blocks headless)")
     p_scrape.set_defaults(func=cmd_scrape)
@@ -134,6 +142,9 @@ def main(argv=None):
     p_serve.set_defaults(func=cmd_serve)
 
     p_sync = sub.add_parser("sync-sheet", help="push all CSV jobs to the configured Google Sheet")
+    p_sync.add_argument("--rebuild", action="store_true",
+                        help="wipe and rewrite the whole sheet (fixes column misalignment; "
+                             "resets the 'applied' column)")
     p_sync.set_defaults(func=cmd_sync_sheet)
 
     args = parser.parse_args(argv)
