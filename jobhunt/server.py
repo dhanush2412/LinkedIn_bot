@@ -73,6 +73,28 @@ def health():
     return {"status": "ok"}
 
 
+@app.get("/profile")
+def profile_endpoint():
+    """Basic contact fields the extension uses to autofill standard form inputs.
+
+    Returns empty/zeroed fields (not an error) when no profile is loaded, so the
+    extension can still fall back to AI form answers.
+    """
+    try:
+        p = load_profile(_profile_dir())
+    except FileNotFoundError:
+        return {"name": "", "email": "", "phone": "", "location": "",
+                "total_years_experience": 0, "loaded": False}
+    return {
+        "name": p.name,
+        "email": p.email,
+        "phone": p.phone,
+        "location": p.location,
+        "total_years_experience": p.total_years_experience,
+        "loaded": True,
+    }
+
+
 @app.post("/tailor", response_model=TailorResponse)
 def tailor_endpoint(req: TailorRequest):
     try:

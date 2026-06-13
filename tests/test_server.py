@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 from unittest.mock import patch
-from jobhunt.models import TailoredOutput
+from jobhunt.models import TailoredOutput, CandidateProfile
 from jobhunt.server import app
 
 
@@ -9,6 +9,33 @@ def test_health_endpoint():
     r = client.get("/health")
     assert r.status_code == 200
     assert r.json() == {"status": "ok"}
+
+
+def test_profile_endpoint_returns_contact_fields():
+    fake = CandidateProfile(
+        name="Jane Doe", email="j@x.com", phone="+91 9999999999",
+        location="Bengaluru", total_years_experience=4.0,
+        current_title="Engineer", current_company="Acme",
+        skills=["Python"], experience=[], education=[], links={},
+        biodata_text="",
+    )
+    with patch("jobhunt.server.load_profile", return_value=fake):
+        client = TestClient(app)
+        r = client.get("/profile")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["name"] == "Jane Doe"
+    assert body["email"] == "j@x.com"
+    assert body["loaded"] is True
+
+
+def test_profile_endpoint_handles_missing_profile():
+    with patch("jobhunt.server.load_profile", side_effect=FileNotFoundError("no resume")):
+        client = TestClient(app)
+        r = client.get("/profile")
+    assert r.status_code == 200
+    assert r.json()["loaded"] is False
+    assert r.json()["name"] == ""
 
 
 def test_tailor_endpoint_returns_output(tmp_path):
