@@ -59,14 +59,16 @@ def cmd_scrape(args):
             jobs = list(s.scrape(args.keywords, max_jobs=args.max))
     elif args.platform == "linkedin":
         from jobhunt.scrapers.linkedin_apify import scrape_linkedin, scrape_linkedin_cascade
+        max_app = None if args.max_applicants in (0, None) else args.max_applicants
+        cap_note = "no applicant cap" if max_app is None else f"<= {max_app} applicants"
         if args.url:
-            print("Scraping LinkedIn via Apify (this can take 1-3 minutes)...")
-            jobs = scrape_linkedin(args.url, max_jobs=args.max, max_applicants=args.max_applicants)
+            print(f"Scraping LinkedIn via Apify ({cap_note}); this can take 1-3 minutes...")
+            jobs = scrape_linkedin(args.url, max_jobs=args.max, max_applicants=max_app)
         else:
             locs = _linkedin_locations(args)
-            print(f"Scraping LinkedIn via Apify across locations (in order): {', '.join(locs)} ...")
+            print(f"Scraping LinkedIn across {', '.join(locs)} ({cap_note})...")
             jobs = scrape_linkedin_cascade(args.keywords, locations=locs, max_jobs=args.max,
-                                           max_applicants=args.max_applicants)
+                                           max_applicants=max_app)
     else:
         print(f"Unknown platform: {args.platform}", file=sys.stderr)
         sys.exit(2)
@@ -143,9 +145,10 @@ def main(argv=None):
                                "(default: Bangalore,Mangalore,Udupi,Hyderabad)")
     p_scrape.add_argument("--location", default="remote")
     p_scrape.add_argument("--max", type=int, default=30)
-    p_scrape.add_argument("--max-applicants", type=int, default=None, dest="max_applicants",
+    p_scrape.add_argument("--max-applicants", type=int, default=50, dest="max_applicants",
                           help="LinkedIn only: keep only jobs with <= this many applicants "
-                               "(less competition). Jobs with unknown counts are kept.")
+                               "(less competition). Default 50. Use 0 to disable. "
+                               "Jobs with unknown counts are kept.")
     p_scrape.add_argument("--headless", action="store_true",
                           help="run browser headless (NOT recommended — Cloudflare blocks headless)")
     p_scrape.set_defaults(func=cmd_scrape)
