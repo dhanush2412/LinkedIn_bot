@@ -32,12 +32,20 @@ def cmd_profile_refresh(_args):
     print(f"Loaded profile for {p.name} ({len(p.skills)} skills, biodata {len(p.biodata_text)} chars)")
 
 
+def _linkedin_locations(args) -> list[str]:
+    from jobhunt.scrapers.linkedin_apify import DEFAULT_LOCATIONS
+    if args.locations:
+        return [c.strip() for c in args.locations.split(",") if c.strip()]
+    return DEFAULT_LOCATIONS
+
+
 def cmd_scrape(args):
     if args.platform == "simplyhired" and not args.keywords:
         print("simplyhired requires --keywords (e.g. --keywords \"python backend\")", file=sys.stderr)
         sys.exit(2)
-    if args.platform == "linkedin" and not args.url:
-        print("linkedin requires --url (a LinkedIn jobs-search URL copied from your browser)",
+    if args.platform == "linkedin" and not args.url and not args.keywords:
+        print("linkedin needs either --url (a LinkedIn search URL) or --keywords "
+              "(to search the location cascade: " + ", ".join(_linkedin_locations(args)) + ")",
               file=sys.stderr)
         sys.exit(2)
     csv = JobsCsv(_data_dir() / "jobs.csv")
@@ -50,9 +58,15 @@ def cmd_scrape(args):
         with InstahyreScraper(headless=args.headless) as s:
             jobs = list(s.scrape(args.keywords, max_jobs=args.max))
     elif args.platform == "linkedin":
-        from jobhunt.scrapers.linkedin_apify import scrape_linkedin
-        print("Scraping LinkedIn via Apify (this can take 1-3 minutes)...")
-        jobs = scrape_linkedin(args.url, max_jobs=args.max, max_applicants=args.max_applicants)
+        from jobhunt.scrapers.linkedin_apify import scrape_linkedin, scrape_linkedin_cascade
+        if args.url:
+            print("Scraping LinkedIn via Apify (this can take 1-3 minutes)...")
+            jobs = scrape_linkedin(args.url, max_jobs=args.max, max_applicants=args.max_applicants)
+        else:
+            locs = _linkedin_locations(args)
+            print(f"Scraping LinkedIn via Apify across locations (in order): {', '.join(locs)} ...")
+            jobs = scrape_linkedin_cascade(args.keywords, locations=locs, max_jobs=args.max,
+                                           max_applicants=args.max_applicants)
     else:
         print(f"Unknown platform: {args.platform}", file=sys.stderr)
         sys.exit(2)
@@ -123,7 +137,10 @@ def main(argv=None):
     p_scrape.add_argument("--keywords", default="",
                           help="filter keywords; required for simplyhired, optional for instahyre")
     p_scrape.add_argument("--url", default="",
-                          help="LinkedIn jobs-search URL (required for linkedin platform)")
+                          help="LinkedIn: a full jobs-search URL (alternative to --keywords + cascade)")
+    p_scrape.add_argument("--locations", default="",
+                          help="LinkedIn cascade: comma-separated cities in priority order "
+                               "(default: Bangalore,Mangalore,Udupi,Hyderabad)")
     p_scrape.add_argument("--location", default="remote")
     p_scrape.add_argument("--max", type=int, default=30)
     p_scrape.add_argument("--max-applicants", type=int, default=None, dest="max_applicants",

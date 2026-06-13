@@ -42,13 +42,22 @@ account or browser** — it calls Apify's hosted LinkedIn scraper, so your accou
 is never at ban risk. It needs a free `APIFY_TOKEN` in `.env` (sign up at
 apify.com → Settings → API tokens; free tier ≈ 5,000 jobs/month).
 
+Two ways to use it:
+
 ```
+# A) Location cascade (recommended): searches cities in priority order, filling
+#    from the most-preferred city first, falling back to the next until full.
+python -m jobhunt scrape linkedin --keywords "python developer" --max 20
+#    Default cities: Bangalore, Mangalore, Udupi, Hyderabad. Override with:
+python -m jobhunt scrape linkedin --keywords "ai engineer" --locations "Bangalore,Pune,Remote" --max 20
+
+# B) Exact search URL: copy a LinkedIn jobs-search URL from your browser.
 python -m jobhunt scrape linkedin --url "<LinkedIn jobs-search URL>" --max 25
 ```
 
-Get the URL by searching jobs on LinkedIn in your browser and copying the address
-bar (set filters like Entry level / Remote first). Jobs land in `data/jobs.csv`
-and tailor exactly like any other source.
+Add `--max-applicants 30` to keep only low-competition jobs (LinkedIn exposes the
+applicant count for some listings; jobs with unknown counts are kept). Jobs land in
+`data/jobs.csv` (and the Google Sheet, if configured) and tailor like any source.
 
 ## LinkedIn Easy Apply extension
 

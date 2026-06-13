@@ -15,6 +15,7 @@ import os
 import re
 from datetime import datetime, timezone
 from typing import Any
+from urllib.parse import quote
 
 import httpx
 
@@ -25,6 +26,9 @@ ACTOR_ID = "hKByXkMQaC5Qt9UMN"  # curious_coder/linkedin-jobs-scraper
 SOURCE = "linkedin"
 RUN_SYNC_URL = f"https://api.apify.com/v2/acts/{ACTOR_ID}/run-sync-get-dataset-items"
 _MIN_COUNT = 10  # the actor rejects count < 10
+
+# Default location preference cascade (most-preferred first).
+DEFAULT_LOCATIONS = ["Bangalore", "Mangalore", "Udupi", "Hyderabad"]
 
 
 def _get_token(token: str | None) -> str:
@@ -128,3 +132,46 @@ def scrape_linkedin(
     jobs = parse_apify_jobs(items)
     jobs = filter_by_applicants(jobs, max_applicants)
     return jobs[:max_jobs]
+
+
+def build_search_url(keywords: str, location: str, entry_level: bool = True,
+                     recent_first: bool = True) -> str:
+    """Build a LinkedIn jobs-search URL for a keyword + location."""
+    params = [f"keywords={quote(keywords)}", f"location={quote(location)}"]
+    if entry_level:
+        params.append("f_E=1%2C2")   # internship + entry level
+    if recent_first:
+        params.append("sortBy=DD")    # most recent first
+    return "https://www.linkedin.com/jobs/search/?" + "&".join(params)
+
+
+def scrape_linkedin_cascade(
+    keywords: str,
+    locations: list[str] | None = None,
+    max_jobs: int = 25,
+    token: str | None = None,
+    max_applicants: int | None = None,
+) -> list[Job]:
+    """Search each location in priority order, filling the result list with the most
+    preferred city's jobs first, then falling back to the next city, until max_jobs
+    is reached or locations are exhausted. Dedupes across cities by job_id."""
+    locations = locations or DEFAULT_LOCATIONS
+    collected: dict[str, Job] = {}
+    per_loc = max_jobs if max_applicants is None else max(max_jobs * 3, max_jobs)
+    for loc in locations:
+        if len(collected) >= max_jobs:
+            break
+        url = build_search_url(keywords, loc)
+        try:
+            items = fetch_linkedin_jobs(url, count=per_loc, token=token)
+        except Exception as e:
+            print(f"[linkedin] {loc}: skipped ({e})")
+            continue
+        jobs = filter_by_applicants(parse_apify_jobs(items), max_applicants)
+        added = 0
+        for j in jobs:
+            if j.job_id not in collected:
+                collected[j.job_id] = j
+                added += 1
+        print(f"[linkedin] {loc}: +{added} new (running total {len(collected)})")
+    return list(collected.values())[:max_jobs]

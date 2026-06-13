@@ -3,8 +3,10 @@
 here (it costs money + needs a token); the pure mapper is."""
 import json
 from pathlib import Path
+from jobhunt.scrapers import linkedin_apify
 from jobhunt.scrapers.linkedin_apify import (
     parse_apify_jobs, _remote_type, parse_applicants, filter_by_applicants,
+    build_search_url, scrape_linkedin_cascade, DEFAULT_LOCATIONS,
 )
 from jobhunt.models import Job
 
@@ -96,3 +98,54 @@ def test_parse_apify_jobs_reads_applicants_count():
     }]
     jobs = parse_apify_jobs(items)
     assert jobs[0].applicants == "12"
+
+
+def test_build_search_url_encodes_keywords_and_location():
+    url = build_search_url("python developer", "Bangalore")
+    assert "keywords=python%20developer" in url
+    assert "location=Bangalore" in url
+    assert "f_E=1%2C2" in url   # entry level
+    assert "sortBy=DD" in url   # recent first
+
+
+def test_default_locations_priority_order():
+    assert DEFAULT_LOCATIONS == ["Bangalore", "Mangalore", "Udupi", "Hyderabad"]
+
+
+def _fake_item(jid, loc):
+    return {"link": f"https://linkedin.com/jobs/view/{jid}", "title": f"Dev {jid}",
+            "companyName": "C", "location": loc, "descriptionText": "desc"}
+
+
+def test_cascade_fills_from_preferred_city_first(monkeypatch):
+    # Bangalore returns 2 jobs, Mangalore returns 2 more. max_jobs=3 -> stop after Mangalore.
+    calls = []
+    def fake_fetch(url, count, token=None, **kw):
+        calls.append(url)
+        if "Bangalore" in url:
+            return [_fake_item("a", "Bangalore"), _fake_item("b", "Bangalore")]
+        if "Mangalore" in url:
+            return [_fake_item("c", "Mangalore"), _fake_item("d", "Mangalore")]
+        return [_fake_item("e", "Udupi")]
+    monkeypatch.setattr(linkedin_apify, "fetch_linkedin_jobs", fake_fetch)
+    jobs = scrape_linkedin_cascade("python", locations=["Bangalore", "Mangalore", "Udupi"], max_jobs=3)
+    ids = [j.job_id for j in jobs]
+    # 2 from Bangalore + 1 from Mangalore = 3; Udupi never queried
+    assert len(jobs) == 3
+    assert any("Bangalore" in c for c in calls)
+    assert any("Mangalore" in c for c in calls)
+    assert not any("Udupi" in c for c in calls)
+
+
+def test_cascade_skips_empty_city_and_continues(monkeypatch):
+    def fake_fetch(url, count, token=None, **kw):
+        if "Bangalore" in url:
+            return []  # nothing in Bangalore
+        if "Mangalore" in url:
+            return [_fake_item("m1", "Mangalore")]
+        return []
+    monkeypatch.setattr(linkedin_apify, "fetch_linkedin_jobs", fake_fetch)
+    jobs = scrape_linkedin_cascade("python", locations=["Bangalore", "Mangalore"], max_jobs=5)
+    assert len(jobs) == 1
+    assert jobs[0].title == "Dev m1"
+    assert jobs[0].location == "Mangalore"
