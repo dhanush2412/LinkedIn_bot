@@ -21,7 +21,12 @@ class JobsCsv:
 
     def append(self, jobs: Iterable[Job]) -> int:
         existing = self._existing_ids()
-        new = [j for j in jobs if j.job_id not in existing]
+        new = []
+        for j in jobs:
+            if j.job_id in existing:
+                continue
+            existing.add(j.job_id)  # also dedupe within this batch
+            new.append(j)
         if not new:
             return 0
         write_header = not self.path.exists()

@@ -38,6 +38,15 @@ def test_append_dedupes_by_job_id(tmp_path):
     assert sorted(j.job_id for j in rows) == ["aaa", "bbb", "ccc"]
 
 
+def test_append_dedupes_within_a_single_batch(tmp_path):
+    csv_path = tmp_path / "jobs.csv"
+    store = JobsCsv(csv_path)
+    inserted = store.append([_make_job("dup"), _make_job("dup"), _make_job("uniq")])
+    assert inserted == 2
+    rows = store.read_all()
+    assert sorted(j.job_id for j in rows) == ["dup", "uniq"]
+
+
 def test_read_all_returns_jobs(tmp_path):
     csv_path = tmp_path / "jobs.csv"
     store = JobsCsv(csv_path)
