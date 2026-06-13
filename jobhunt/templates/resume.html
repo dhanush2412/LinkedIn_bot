@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>{{ name }} — Resume</title>
+<style>
+  @page { size: Letter; margin: 0.6in 0.7in; }
+  body { font-family: "Helvetica", "Arial", sans-serif; font-size: 10.5pt; color: #1a1a1a; line-height: 1.35; }
+  .header { text-align: center; margin-bottom: 14pt; }
+  .name { font-size: 18pt; font-weight: 700; letter-spacing: 0.5pt; }
+  .contact { font-size: 9.5pt; color: #444; margin-top: 4pt; }
+  .contact a { color: #444; text-decoration: none; }
+  h2 { font-size: 11pt; text-transform: uppercase; letter-spacing: 1pt;
+       border-bottom: 1px solid #888; padding-bottom: 2pt; margin-top: 12pt; margin-bottom: 6pt; }
+  h3 { font-size: 10.5pt; font-weight: 700; margin: 6pt 0 2pt 0; }
+  ul { margin: 2pt 0 6pt 18pt; padding: 0; }
+  li { margin-bottom: 2pt; }
+  p { margin: 0 0 6pt 0; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="name">{{ name }}</div>
+    <div class="contact">
+      {{ email }} &nbsp;·&nbsp; {{ phone }} &nbsp;·&nbsp; {{ location }}
+      {% if links.github %}<br><a href="{{ links.github }}">{{ links.github }}</a>{% endif %}
+      {% if links.linkedin %} &nbsp;·&nbsp; <a href="{{ links.linkedin }}">{{ links.linkedin }}</a>{% endif %}
+    </div>
+  </div>
+  <div class="body">
+    {{ body_html | safe }}
+  </div>
+</body>
+</html>
