@@ -33,6 +33,9 @@ def cmd_profile_refresh(_args):
 
 
 def cmd_scrape(args):
+    if args.platform == "simplyhired" and not args.keywords:
+        print("simplyhired requires --keywords (e.g. --keywords \"python backend\")", file=sys.stderr)
+        sys.exit(2)
     csv = JobsCsv(_data_dir() / "jobs.csv")
     if args.platform == "simplyhired":
         from jobhunt.scrapers.simplyhired import SimplyHiredScraper
@@ -80,7 +83,8 @@ def main(argv=None):
 
     p_scrape = sub.add_parser("scrape")
     p_scrape.add_argument("platform", choices=["simplyhired", "instahyre"])
-    p_scrape.add_argument("--keywords", required=True)
+    p_scrape.add_argument("--keywords", default="",
+                          help="filter keywords; required for simplyhired, optional for instahyre")
     p_scrape.add_argument("--location", default="remote")
     p_scrape.add_argument("--max", type=int, default=30)
     p_scrape.add_argument("--headless", action="store_true",
