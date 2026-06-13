@@ -48,6 +48,12 @@ def tailor(
     messages = build_messages(job, profile, form_questions or [])
     result = call_groq_for_tailoring(messages)
 
+    missing = [k for k in ("cover_letter", "tailored_resume_md") if k not in result]
+    if missing:
+        raise ValueError(
+            f"LLM response missing required key(s): {', '.join(missing)}. "
+            f"Got keys: {sorted(result.keys())}"
+        )
     cover = result["cover_letter"]
     resume_md = result["tailored_resume_md"]
     answers = result.get("form_answers", {})

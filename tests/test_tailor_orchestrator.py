@@ -1,4 +1,5 @@
 import json
+import pytest
 from pathlib import Path
 from jobhunt.models import Job, CandidateProfile, TailoredOutput
 from jobhunt.tailor.orchestrator import tailor
@@ -40,6 +41,15 @@ def test_tailor_writes_outputs_to_disk(tmp_path, mocker):
     assert (job_dir / "form_answers.json").exists()
     assert (job_dir / "tailored_resume.pdf").exists()
     assert out.resume_pdf_path == str(job_dir / "tailored_resume.pdf")
+
+
+def test_tailor_raises_clear_error_on_malformed_llm_response(tmp_path, mocker):
+    mocker.patch(
+        "jobhunt.tailor.orchestrator.call_groq_for_tailoring",
+        return_value={"form_answers": {}},  # missing cover_letter + tailored_resume_md
+    )
+    with pytest.raises(ValueError, match="missing required key"):
+        tailor(_job(), _profile(), form_questions=[], output_root=tmp_path)
 
 
 def test_tailor_uses_cache_on_second_call(tmp_path, mocker):
