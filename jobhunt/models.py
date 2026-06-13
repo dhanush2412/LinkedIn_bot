@@ -68,6 +68,7 @@ class CandidateProfile:
     education: list[dict[str, Any]]
     links: dict[str, str]
     biodata_text: str
+    raw_resume_text: str = ""
 
     def to_json(self) -> dict[str, Any]:
         return asdict(self)

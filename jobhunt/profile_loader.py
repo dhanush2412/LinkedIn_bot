@@ -86,6 +86,7 @@ def _parse_resume_pdf(path: Path) -> dict[str, Any]:
         "experience": [],
         "education": [],
         "links": links,
+        "raw_resume_text": text,
     }
 
 
